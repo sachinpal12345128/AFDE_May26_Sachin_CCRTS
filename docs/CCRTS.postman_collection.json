@@ -1,0 +1,133 @@
+{
+  "info": {
+    "name": "CCRTS — Customer Complaint & Resolution Tracking System",
+    "description": "Phase 1 capstone API. Set baseUrl and demoPassword in the collection variables; run 'Login (admin)' first to populate the {{token}} variable used by every other request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "demoPassword", "value": "password123" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/", "auth": { "type": "noauth" } }
+    },
+    {
+      "name": "Login (admin)",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": ["const data = pm.response.json();", "pm.collectionVariables.set('token', data.access_token);"]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@ccrts.example.com\",\n  \"password\": \"{{demoPassword}}\"\n}" }
+      }
+    },
+    {
+      "name": "Login (customer1)",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": ["const data = pm.response.json();", "pm.collectionVariables.set('token', data.access_token);"]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"customer1@ccrts.example.com\",\n  \"password\": \"{{demoPassword}}\"\n}" }
+      }
+    },
+    {
+      "name": "Register (new customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/register",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Diya Patel\",\n  \"email\": \"diya@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}" }
+      }
+    },
+    { "name": "Auth — me", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+    { "name": "Categories — list", "request": { "method": "GET", "url": "{{baseUrl}}/categories" } },
+    { "name": "Users — list (admin)", "request": { "method": "GET", "url": "{{baseUrl}}/users" } },
+    { "name": "Users — agents", "request": { "method": "GET", "url": "{{baseUrl}}/users/agents" } },
+    {
+      "name": "Users — create agent (admin)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/users",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cassie Coder\",\n  \"email\": \"agent3@ccrts.example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9111111111\",\n  \"role_name\": \"Agent\"\n}" }
+      }
+    },
+    { "name": "Complaints — list", "request": { "method": "GET", "url": "{{baseUrl}}/complaints" } },
+    {
+      "name": "Complaints — list (filter)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/complaints?status=Open&priority=High",
+          "host": ["{{baseUrl}}"],
+          "path": ["complaints"],
+          "query": [
+            { "key": "status", "value": "Open" },
+            { "key": "priority", "value": "High" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Complaints — create (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/complaints",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"category_id\": 1,\n  \"subject\": \"Test complaint from Postman\",\n  \"description\": \"Test description for the demo run.\",\n  \"priority\": \"High\"\n}" }
+      }
+    },
+    { "name": "Complaints — get by id", "request": { "method": "GET", "url": "{{baseUrl}}/complaints/1" } },
+    {
+      "name": "Complaints — assign (supervisor)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/complaints/1/assign",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"agent_id\": 3\n}" }
+      }
+    },
+    {
+      "name": "Complaints — update status",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/complaints/1/status",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"In Progress\",\n  \"comment\": \"Investigating now\"\n}" }
+      }
+    },
+    {
+      "name": "Complaints — submit feedback",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/complaints/1/feedback",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comments\": \"Resolved quickly\"\n}" }
+      }
+    },
+    { "name": "Dashboard — stats", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/stats" } }
+  ]
+}
